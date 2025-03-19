@@ -6,6 +6,7 @@ sentence-transformers==2.2.2
 tenacity==8.2.3
 tiktoken==0.5.1 
 torch
+huggingface_hub==0.25.0
 transformers==4.38.1
 umap-learn==0.5.5
 urllib3==1.26.6 

@@ -25,12 +25,12 @@ class TreeBuilderConfig:
     def __init__(
         self,
         tokenizer=None,
-        max_tokens=None,
-        num_layers=None,
-        threshold=None,
-        top_k=None,
+        max_tokens=300,
+        num_layers=5,
+        threshold=0.6,
+        top_k=8,
         selection_mode=None,
-        summarization_length=None,
+        summarization_length=200,
         summarization_model=None,
         embedding_models=None,
         cluster_embedding_model=None,
@@ -40,7 +40,7 @@ class TreeBuilderConfig:
         self.tokenizer = tokenizer
 
         if max_tokens is None:
-            max_tokens = 100
+            max_tokens = 300
         if not isinstance(max_tokens, int) or max_tokens < 1:
             raise ValueError("max_tokens must be an integer and at least 1")
         self.max_tokens = max_tokens
@@ -52,13 +52,13 @@ class TreeBuilderConfig:
         self.num_layers = num_layers
 
         if threshold is None:
-            threshold = 0.5
+            threshold = 0.6
         if not isinstance(threshold, (int, float)) or not (0 <= threshold <= 1):
             raise ValueError("threshold must be a number between 0 and 1")
         self.threshold = threshold
 
         if top_k is None:
-            top_k = 5
+            top_k = 8
         if not isinstance(top_k, int) or top_k < 1:
             raise ValueError("top_k must be an integer and at least 1")
         self.top_k = top_k
@@ -70,7 +70,7 @@ class TreeBuilderConfig:
         self.selection_mode = selection_mode
 
         if summarization_length is None:
-            summarization_length = 100
+            summarization_length = 200
         self.summarization_length = summarization_length
 
         if summarization_model is None:
