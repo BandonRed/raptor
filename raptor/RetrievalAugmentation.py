@@ -3,7 +3,7 @@ import pickle
 
 from .cluster_tree_builder import ClusterTreeBuilder, ClusterTreeConfig
 from .EmbeddingModels import BaseEmbeddingModel
-from .QAModels import BaseQAModel, GPT3TurboQAModel
+from .QAModels import BaseQAModel, GPT4QAModel
 from .SummarizationModels import BaseSummarizationModel
 from .tree_builder import TreeBuilder, TreeBuilderConfig
 from .tree_retriever import TreeRetriever, TreeRetrieverConfig
@@ -36,12 +36,12 @@ class RetrievalAugmentationConfig:
         tr_start_layer=None,
         # TreeBuilderConfig arguments
         tb_tokenizer=None,
-        tb_max_tokens=100,
+        tb_max_tokens=500,
         tb_num_layers=5,
         tb_threshold=0.5,
         tb_top_k=5,
         tb_selection_mode="top_k",
-        tb_summarization_length=100,
+        tb_summarization_length=200,
         tb_summarization_model=None,
         tb_embedding_models=None,
         tb_cluster_embedding_model="OpenAI",
@@ -129,7 +129,7 @@ class RetrievalAugmentationConfig:
         # Assign the created configurations to the instance
         self.tree_builder_config = tree_builder_config
         self.tree_retriever_config = tree_retriever_config
-        self.qa_model = qa_model or GPT3TurboQAModel()
+        self.qa_model = qa_model or GPT4QAModel()
         self.tree_builder_type = tree_builder_type
 
     def log_config(self):
