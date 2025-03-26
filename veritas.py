@@ -1394,7 +1394,7 @@ class EnhancedRAPTOREvaluator:
                 combined_results['relevance'] * 0.1 + 
                 combined_results['keyword_match_rate'] * 10 * 0.1  # Scale to 0-10
             )
-        
+        combined_results['aggregate_score'] = round(combined_results['aggregate_score'], 3)
         if self.verbose:
             print(f"[INFO] Comprehensive evaluation complete")
             avg_score = combined_results['aggregate_score'].mean()
@@ -1416,12 +1416,12 @@ class EnhancedRAPTOREvaluator:
         
         # Calculate summary statistics (safely handling NaN values)
         summary = {
-            'avg_accuracy': results['accuracy'].mean() if 'accuracy' in results else None,
-            'avg_completeness': results['completeness'].mean() if 'completeness' in results else None,
-            'avg_faithfulness': results['faithfulness'].mean() if 'faithfulness' in results else None,
-            'avg_relevance': results['relevance'].mean() if 'relevance' in results else None,
-            'avg_keyword_match': results['keyword_match_rate'].mean() if 'keyword_match_rate' in results else None,
-            'avg_aggregate_score': results['aggregate_score'].mean() if not results['aggregate_score'].isna().all() else None,
+            'avg_accuracy': round(results['accuracy'].mean(), 3) if 'accuracy' in results else None,
+            'avg_completeness': round(results['completeness'].mean(), 3) if 'completeness' in results else None,
+            'avg_faithfulness': round(results['faithfulness'].mean(), 3) if 'faithfulness' in results else None,
+            'avg_relevance': round(results['relevance'].mean(), 3) if 'relevance' in results else None,
+            'avg_keyword_match': round(results['keyword_match_rate'].mean(), 3) if 'keyword_match_rate' in results else None,
+            'avg_aggregate_score': round(results['aggregate_score'].mean(), 3) if not results['aggregate_score'].isna().all() else None,
             'question_count': len(results),
             'perfect_score_count': sum(results['aggregate_score'] >= 9.0) if not results['aggregate_score'].isna().all() else 0,
             'poor_score_count': sum(results['aggregate_score'] < 6.0) if not results['aggregate_score'].isna().all() else 0

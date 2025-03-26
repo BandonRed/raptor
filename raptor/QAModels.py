@@ -3,7 +3,8 @@ import os
 
 from openai import OpenAI
 
-
+from lightbox_utils.langsmith_tools import traced_pipeline
+from langsmith.wrappers import wrap_openai
 import getpass
 from abc import ABC, abstractmethod
 
@@ -44,7 +45,7 @@ class GPT3QAModel(BaseQAModel):
         """
         try:
             response = self.client.completions.create(
-                prompt=f"using the folloing information {context}. Answer the following question in less than 5-7 words, if possible: {question}",
+                prompt=f"using the following information {context}. Answer the following question in less than 5-7 words, if possible: {question}",
                 temperature=0,
                 max_tokens=max_tokens,
                 top_p=1,
@@ -112,8 +113,9 @@ class GPT3TurboQAModel(BaseQAModel):
             return e
 
 
+# noinspection PyArgumentList
 class GPT4QAModel(BaseQAModel):
-    def __init__(self, model="gpt-4o"):
+    def __init__(self, model="gpt-4o-mini"):
         """
         Initializes the GPT-4 model with the specified model version.
 
@@ -125,35 +127,52 @@ class GPT4QAModel(BaseQAModel):
 
     @retry(wait=wait_random_exponential(min=1, max=20), stop=stop_after_attempt(6))
     def _attempt_answer_question(
-        self, context, question, max_tokens=150, stop_sequence=None
+        self, context, question, max_tokens=500, stop_sequence=None
     ):
         """
         Generates a summary of the given context using the GPT-4 model.
 
         Args:
             context (str): The text to summarize.
-            max_tokens (int, optional): The maximum number of tokens in the generated summary. Defaults to 150.
+            max_tokens (int, optional): The maximum number of tokens in the generated summary. Defaults to 400.
             stop_sequence (str, optional): The sequence at which to stop summarization. Defaults to None.
 
         Returns:
             str: The generated summary.
+
         """
+        system_prompt = ("You are an expert in Medicare claims processing. "
+                         "Always provide the most accurate, concise, and relevant answer, focusing on official Medicare guidelines. "
+                         "Do not add extraneous details unless they are essential to correctness."
+        )
+        user_prompt = (f"""
+            Context: {context}
+            Question: {question}
+            Instructions:
+            - Try to keep the answer under 100 words, unless more detail is absolutely necessary.
+            - If disclaimers or conditions are essential for correctness, include them succinctly.
+            - Focus on official Medicare guidelines. Do not hallucinate or add extraneous context.
+        """)
+        print("Tracing QA answer question...")
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[
-                {"role": "system", "content": "You are an RCM expert, tasked with operating a Question Answering Portal"},
-                {
-                    "role": "user",
-                    "content": f"Given Context: {context} Give the best full answer amongst the option to question {question}",
-                },
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
             ],
-            temperature=0,
+            max_tokens=max_tokens,
+            # langsmith_extra={
+            #     "tags": ["qa", "medicare", "question-answering"],
+            #     "name": "Medicare QA",
+            #     "project_name": "lightbox-dev",
+            #     "raptor_step": "qa"
+            # },
         )
-
-        return response.choices[0].message.content.strip()
+        answer = response.choices[0].message.content.strip()
+        return answer
 
     @retry(wait=wait_random_exponential(min=1, max=20), stop=stop_after_attempt(6))
-    def answer_question(self, context, question, max_tokens=150, stop_sequence=None):
+    def answer_question(self, context, question, max_tokens=500, stop_sequence=None):
 
         try:
             return self._attempt_answer_question(

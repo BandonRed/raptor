@@ -12,7 +12,7 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .EmbeddingModels import BaseEmbeddingModel, OpenAIEmbeddingModel
 from .SummarizationModels import (BaseSummarizationModel,
-                                  GPT3TurboSummarizationModel)
+                                  GPT3TurboSummarizationModel, GPT4OSummarizationModel)
 from .tree_structures import Node, Tree
 from .utils import (distances_from_embeddings, get_children, get_embeddings,
                     get_node_list, get_text,
@@ -74,10 +74,11 @@ class TreeBuilderConfig:
         self.summarization_length = summarization_length
 
         if summarization_model is None:
-            summarization_model = GPT3TurboSummarizationModel()
+            summarization_model = GPT4OSummarizationModel()
         if not isinstance(summarization_model, BaseSummarizationModel):
             raise ValueError(
                 "summarization_model must be an instance of BaseSummarizationModel"
+                f"{type(summarization_model)}"
             )
         self.summarization_model = summarization_model
 
@@ -103,6 +104,9 @@ class TreeBuilderConfig:
         self.cluster_embedding_model = cluster_embedding_model
 
     def log_config(self):
+        summarization_model_class = self.summarization_model.__class__.__name__
+        cluster_embedding_model_instance = self.embedding_models[self.cluster_embedding_model]
+        cluster_embedding_model_class = cluster_embedding_model_instance.__class__.__name__
         config_log = """
         TreeBuilderConfig:
             Tokenizer: {tokenizer}
@@ -112,9 +116,9 @@ class TreeBuilderConfig:
             Top K: {top_k}
             Selection Mode: {selection_mode}
             Summarization Length: {summarization_length}
-            Summarization Model: {summarization_model}
+            Summarization Model: {summarization_model} (Class: {summarization_model_class})
             Embedding Models: {embedding_models}
-            Cluster Embedding Model: {cluster_embedding_model}
+            Cluster Embedding Model: {cluster_embedding_model} (Class: {cluster_embedding_model_class})
         """.format(
             tokenizer=self.tokenizer,
             max_tokens=self.max_tokens,
@@ -124,8 +128,10 @@ class TreeBuilderConfig:
             selection_mode=self.selection_mode,
             summarization_length=self.summarization_length,
             summarization_model=self.summarization_model,
+            summarization_model_class=summarization_model_class,
             embedding_models=self.embedding_models,
             cluster_embedding_model=self.cluster_embedding_model,
+            cluster_embedding_model_class=cluster_embedding_model_class,
         )
         return config_log
 
