@@ -38,25 +38,25 @@ class RAPTOREvaluator:
 
             # Prepare the evaluation prompt that includes the reference example answer.
             prompt = f"""
-Evaluate the following Question & Answer pair based on Medicare guidelines. 
-Consider the provided example good answer as the reference standard.
-
-Evaluation Metrics (0-10):
-- Accuracy: Does the retrieved answer correctly address the question based on Medicare's official guidelines?
-- Completeness: Does the retrieved answer include all relevant details compared to the example answer?
-- Faithfulness: Does the retrieved answer strictly use information from the document without introducing hallucinations?
-- Relevance: Does the retrieved answer stay focused on the question without including unrelated or extraneous information?
-
-Please respond ONLY with a JSON object in the format:
-{{"feedback": str, "metrics": {{"accuracy": int, "completeness": int, "faithfulness": int, "relevance": int}}}}
-
-Do NOT include markdown, code blocks, or additional explanations. We will directly parse your output.
-
----
-Question: {question}
-Example Good Answer: {example_answer}
-Retrieved Answer: {retrieved_answer}
-"""
+            Evaluate the following Question & Answer pair based on Medicare guidelines. 
+            Consider the provided example good answer as the reference standard.
+            
+            Evaluation Metrics (0-10):
+            - Accuracy: Does the retrieved answer correctly address the question based on Medicare's official guidelines?
+            - Completeness: Does the retrieved answer include all relevant details compared to the example answer?
+            - Faithfulness: Does the retrieved answer strictly use information from the document without introducing hallucinations?
+            - Relevance: Does the retrieved answer stay focused on the question without including unrelated or extraneous information?
+            
+            Please respond ONLY with a JSON object in the format:
+            {{"feedback": str, "metrics": {{"accuracy": int, "completeness": int, "faithfulness": int, "relevance": int}}}}
+            
+            Do NOT include markdown, code blocks, or additional explanations. We will directly parse your output.
+            
+            ---
+            Question: {question}
+            Example Good Answer: {example_answer}
+            Retrieved Answer: {retrieved_answer}
+            """
 
             try:
                 response = self.client.chat.completions.create(
